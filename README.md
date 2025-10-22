@@ -1,3 +1,11 @@
+# User Journey: The Video!
+
+
+[![Watch the video](https://youtube.com/shorts/Tx_oDc2P1dM?feature=share)](https://youtube.com/shorts/Tx_oDc2P1dM?feature=share)
+
+
+
+
 # User Journey: Finding Dorm Inspiration
 
 Alex, a first-year MIT student, feels anxious about how to style her New Vassar double room and wants to find design ideas that match her space. She opens the MITDormCraft app and begins by navigating to the Register page, where she creates an account using her MIT Kerberos ID, choosing a username and password. After registering, she is redirected to the Home page.
