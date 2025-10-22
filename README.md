@@ -3,6 +3,8 @@
 
 [![Watch the video](https://youtube.com/shorts/Tx_oDc2P1dM?feature=share)](https://youtube.com/shorts/Tx_oDc2P1dM?feature=share)
 
+<a href="https://youtube.com/shorts/Tx_oDc2P1dM?feature=share" target="_blank" rel="noopener noreferrer">![Watch the video](https://img.youtube.com/vi/Tx_oDc2P1dM/0.jpg)</a>
+
 
 
 
