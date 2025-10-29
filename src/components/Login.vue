@@ -5,10 +5,10 @@
       <p class="subtitle">Welcome back to MIT DormCraft</p>
       
       <form @submit.prevent="handleSubmit" class="form">
-        <!-- MIT Kerberos Field -->
+        <!-- MIT Email Field -->
         <div class="form-group">
           <label for="mitKerberos" class="form-label">
-            MIT Kerberos <span class="required">*</span>
+            MIT Email <span class="required">*</span>
           </label>
           <input
             id="mitKerberos"
@@ -81,12 +81,7 @@
 
       <!-- Register Link -->
       <div class="register-link">
-        <p>Don't have an account? <a href="#" @click.prevent="$emit('switch-to-register')">Create one here</a></p>
-      </div>
-
-      <!-- Forgot Password Link -->
-      <div class="forgot-password-link">
-        <a href="#" @click.prevent="handleForgotPassword">Forgot your password?</a>
+        <p>Don't have an account? <RouterLink to="/register">Create one here</RouterLink></p>
       </div>
     </div>
   </div>
@@ -96,12 +91,8 @@
 import { ref, computed, reactive } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
+import { RouterLink } from 'vue-router'
 import type { LoginData } from '@/types/api'
-
-// Define emits
-const emit = defineEmits<{
-  'switch-to-register': []
-}>()
 
 // Use auth store
 const authStore = useAuthStore()
@@ -136,7 +127,7 @@ const isFormValid = computed(() => {
 const validateKerberos = () => {
   const kerberos = formData.mitKerberos.trim()
   if (!kerberos) {
-    errors.mitKerberos = 'MIT Kerberos is required'
+    errors.mitKerberos = 'MIT Email is required'
   } else if (!/^[a-zA-Z0-9._%+-]+@mit\.edu$/i.test(kerberos)) {
     errors.mitKerberos = 'Please enter a valid MIT email address'
   } else {
@@ -225,12 +216,6 @@ const handleSubmit = async () => {
   }
 }
 
-// Handle forgot password
-const handleForgotPassword = () => {
-  // For now, just show an alert
-  // In a real app, this would redirect to a password reset page or show a modal
-  alert('Password reset functionality would be implemented here.\n\nFor now, please contact your system administrator.')
-}
 </script>
 
 <style scoped>
@@ -241,24 +226,25 @@ const handleForgotPassword = () => {
 }
 
 .login-form {
-  background: white;
+  background: linear-gradient(145deg, rgba(22, 36, 71, 0.95), rgba(31, 64, 104, 0.95));
   padding: 30px;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e1e5e9;
+  box-shadow: 0 8px 32px rgba(29, 178, 235, 0.3), 0 0 60px rgba(0, 212, 255, 0.15);
+  border: 2px solid rgba(29, 178, 235, 0.4);
 }
 
 .login-form h2 {
   text-align: center;
-  color: #2c3e50;
+  color: #1db2eb;
   margin-bottom: 8px;
   font-size: 28px;
   font-weight: 600;
+  text-shadow: 0 0 20px rgba(29, 178, 235, 0.5);
 }
 
 .subtitle {
   text-align: center;
-  color: #6c757d;
+  color: white;
   margin-bottom: 30px;
   font-size: 16px;
 }
@@ -276,7 +262,7 @@ const handleForgotPassword = () => {
 
 .form-label {
   font-weight: 600;
-  color: #495057;
+  color: #4dd0e1;
   margin-bottom: 6px;
   font-size: 14px;
 }
@@ -287,17 +273,23 @@ const handleForgotPassword = () => {
 
 .form-input {
   padding: 12px 16px;
-  border: 2px solid #e1e5e9;
+  border: 2px solid rgba(29, 178, 235, 0.3);
   border-radius: 8px;
   font-size: 16px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  background: #fff;
+  transition: all 0.3s ease;
+  background: rgba(10, 26, 46, 0.6);
+  color: #e8f4f8;
+}
+
+.form-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+  font-family: 'Fredoka', 'Kalam', cursive, sans-serif;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  border-color: #1db2eb;
+  box-shadow: 0 0 20px rgba(29, 178, 235, 0.4), inset 0 0 15px rgba(0, 212, 255, 0.1);
 }
 
 .form-input.error {
@@ -344,7 +336,7 @@ const handleForgotPassword = () => {
 }
 
 .submit-button {
-  background: linear-gradient(135deg, #28a745, #20c997);
+  background: linear-gradient(135deg, #1db2eb, #00d4ff);
   color: white;
   border: none;
   padding: 14px 24px;
@@ -361,16 +353,17 @@ const handleForgotPassword = () => {
 }
 
 .submit-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #20c997, #17a2b8);
+  background: linear-gradient(135deg, #00d4ff, #1db2eb);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 0 25px rgba(29, 178, 235, 0.6), 0 0 50px rgba(0, 212, 255, 0.4);
 }
 
 .submit-button:disabled {
-  background: #6c757d;
+  background: linear-gradient(135deg, rgba(29, 178, 235, 0.5), rgba(0, 212, 255, 0.5));
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+  opacity: 0.6;
 }
 
 .loading-spinner {
@@ -411,37 +404,21 @@ const handleForgotPassword = () => {
   text-align: center;
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid #e1e5e9;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .register-link p {
-  color: #6c757d;
+  color: white;
   margin: 0;
 }
 
 .register-link a {
-  color: #007bff;
+  color: #4dd0e1;
   text-decoration: none;
   font-weight: 600;
 }
 
 .register-link a:hover {
-  text-decoration: underline;
-}
-
-.forgot-password-link {
-  text-align: center;
-  margin-top: 16px;
-}
-
-.forgot-password-link a {
-  color: #6c757d;
-  text-decoration: none;
-  font-size: 14px;
-}
-
-.forgot-password-link a:hover {
-  color: #007bff;
   text-decoration: underline;
 }
 

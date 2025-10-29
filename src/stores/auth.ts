@@ -7,6 +7,8 @@ export const useAuthStore = defineStore('auth', {
     userID: null as string | null,
     username: null as string | null,
     bio: null as string | null,
+    mitKerberos: null as string | null,
+    profileImageURL: null as string | null,
     isAuthenticated: false,
     isLoading: false,
     error: null as string | null,
@@ -29,23 +31,29 @@ export const useAuthStore = defineStore('auth', {
       
       try {
         const response = await authAPI.registerAndCreateAccount(userData)
+        console.log('Registration response:', response)
         
-        if (response.userID) {
-          this.userID = response.userID
+        // The response might be the userID directly or wrapped in a userID field
+        const userID = response.userID || response
+        
+        if (userID && typeof userID === 'string') {
+          this.userID = userID
           this.username = userData.username
           this.bio = userData.bio
           this.isAuthenticated = true
           
           // Store in localStorage for persistence
-          localStorage.setItem('userID', response.userID)
+          localStorage.setItem('userID', userID)
           localStorage.setItem('username', userData.username)
           localStorage.setItem('bio', userData.bio)
+          localStorage.setItem('mitKerberos', userData.mitKerberos)
           
-          return { success: true, userID: response.userID }
+          return { success: true, userID: userID }
         } else {
-          throw new Error('Registration failed: No userID returned')
+          throw new Error('Registration failed: No userID returned from server')
         }
       } catch (error: any) {
+        console.error('Registration error:', error)
         this.error = error.response?.data?.error || error.message || 'Registration failed'
         return { success: false, error: this.error }
       } finally {
@@ -110,6 +118,8 @@ export const useAuthStore = defineStore('auth', {
       this.userID = null
       this.username = null
       this.bio = null
+      this.mitKerberos = null
+      this.profileImageURL = null
       this.isAuthenticated = false
       this.error = null
       
@@ -117,6 +127,8 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('userID')
       localStorage.removeItem('username')
       localStorage.removeItem('bio')
+      localStorage.removeItem('mitKerberos')
+      localStorage.removeItem('profileImageURL')
     },
 
     // Initialize auth state from localStorage
@@ -124,13 +136,23 @@ export const useAuthStore = defineStore('auth', {
       const userID = localStorage.getItem('userID')
       const username = localStorage.getItem('username')
       const bio = localStorage.getItem('bio')
+      const mitKerberos = localStorage.getItem('mitKerberos')
+      const profileImageURL = localStorage.getItem('profileImageURL')
       
       if (userID) {
         this.userID = userID
         this.username = username
         this.bio = bio
+        this.mitKerberos = mitKerberos
+        this.profileImageURL = profileImageURL
         this.isAuthenticated = true
       }
+    },
+
+    // Update profile image
+    setProfileImage(imageURL: string) {
+      this.profileImageURL = imageURL
+      localStorage.setItem('profileImageURL', imageURL)
     },
 
     // Clear error state

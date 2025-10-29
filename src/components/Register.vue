@@ -5,10 +5,10 @@
       <p class="subtitle">Join MIT DormCraft to share your dorm room designs</p>
       
       <form @submit.prevent="handleSubmit" class="form">
-        <!-- Username Field -->
+        <!-- Name Field -->
         <div class="form-group">
           <label for="username" class="form-label">
-            Username <span class="required">*</span>
+            Name <span class="required">*</span>
           </label>
           <input
             id="username"
@@ -16,7 +16,7 @@
             type="text"
             class="form-input"
             :class="{ 'error': errors.username }"
-            placeholder="Choose a unique username"
+            placeholder="Enter your full name"
             required
             @blur="validateUsername"
           />
@@ -25,10 +25,10 @@
           </div>
         </div>
 
-        <!-- MIT Kerberos Field -->
+        <!-- MIT Email Field -->
         <div class="form-group">
           <label for="mitKerberos" class="form-label">
-            MIT Kerberos <span class="required">*</span>
+            MIT Email <span class="required">*</span>
           </label>
           <input
             id="mitKerberos"
@@ -134,7 +134,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive } from 'vue'
+import { ref, computed, reactive, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import type { RegisterData } from '@/types/api'
@@ -157,6 +157,16 @@ const formData = reactive<RegisterData & { confirmPassword: string }>({
   confirmPassword: '',
 })
 
+// Clear form on mount
+onMounted(() => {
+  formData.username = ''
+  formData.mitKerberos = ''
+  formData.bio = ''
+  formData.credential_data = ''
+  formData.confirmPassword = ''
+  clearErrors()
+})
+
 // Form state
 const isLoading = ref(false)
 const apiError = ref('')
@@ -174,6 +184,7 @@ const errors = reactive<Record<string, string>>({
 // Computed property to check if form is valid
 const isFormValid = computed(() => {
   return formData.username.trim() !== '' &&
+         formData.username.trim().length >= 2 &&
          formData.mitKerberos.trim() !== '' &&
          formData.credential_data.trim() !== '' &&
          formData.confirmPassword.trim() !== '' &&
@@ -184,11 +195,11 @@ const isFormValid = computed(() => {
 const validateUsername = () => {
   const username = formData.username.trim()
   if (!username) {
-    errors.username = 'Username is required'
-  } else if (username.length < 3) {
-    errors.username = 'Username must be at least 3 characters long'
-  } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-    errors.username = 'Username can only contain letters, numbers, and underscores'
+    errors.username = 'Name is required'
+  } else if (username.length < 2) {
+    errors.username = 'Name must be at least 2 characters long'
+  } else if (!/^[a-zA-Z\s.'-]+$/.test(username)) {
+    errors.username = 'Name can only contain letters, spaces, and common name characters (., \', -)'
   } else {
     errors.username = ''
   }
@@ -197,7 +208,7 @@ const validateUsername = () => {
 const validateKerberos = () => {
   const kerberos = formData.mitKerberos.trim()
   if (!kerberos) {
-    errors.mitKerberos = 'MIT Kerberos is required'
+    errors.mitKerberos = 'MIT Email is required'
   } else if (!/^[a-zA-Z0-9._%+-]+@mit\.edu$/i.test(kerberos)) {
     errors.mitKerberos = 'Please enter a valid MIT email address'
   } else {
@@ -310,7 +321,7 @@ const handleSubmit = async () => {
       if (errorMessage.includes('username') && errorMessage.includes('exist')) {
         errors.username = 'This username is already taken'
       } else if (errorMessage.includes('mitKerberos') && errorMessage.includes('exist')) {
-        errors.mitKerberos = 'This MIT Kerberos is already registered'
+        errors.mitKerberos = 'This MIT Email is already registered'
       } else {
         apiError.value = errorMessage
       }
@@ -331,24 +342,25 @@ const handleSubmit = async () => {
 }
 
 .register-form {
-  background: white;
+  background: linear-gradient(145deg, rgba(22, 36, 71, 0.95), rgba(31, 64, 104, 0.95));
   padding: 30px;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e1e5e9;
+  box-shadow: 0 8px 32px rgba(29, 178, 235, 0.3), 0 0 60px rgba(0, 212, 255, 0.15);
+  border: 2px solid rgba(29, 178, 235, 0.4);
 }
 
 .register-form h2 {
   text-align: center;
-  color: #2c3e50;
+  color: #1db2eb;
   margin-bottom: 8px;
+  text-shadow: 0 0 20px rgba(29, 178, 235, 0.5);
   font-size: 28px;
   font-weight: 600;
 }
 
 .subtitle {
   text-align: center;
-  color: #6c757d;
+  color: white;
   margin-bottom: 30px;
   font-size: 16px;
 }
@@ -366,7 +378,7 @@ const handleSubmit = async () => {
 
 .form-label {
   font-weight: 600;
-  color: #495057;
+  color: #4dd0e1;
   margin-bottom: 6px;
   font-size: 14px;
 }
@@ -378,18 +390,25 @@ const handleSubmit = async () => {
 .form-input,
 .form-textarea {
   padding: 12px 16px;
-  border: 2px solid #e1e5e9;
+  border: 2px solid rgba(29, 178, 235, 0.3);
   border-radius: 8px;
   font-size: 16px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  background: #fff;
+  transition: all 0.3s ease;
+  background: rgba(10, 26, 46, 0.6);
+  color: #e8f4f8;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+  font-family: 'Fredoka', 'Kalam', cursive, sans-serif;
 }
 
 .form-input:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  border-color: #1db2eb;
+  box-shadow: 0 0 20px rgba(29, 178, 235, 0.4), inset 0 0 15px rgba(0, 212, 255, 0.1);
 }
 
 .form-input.error,
@@ -411,7 +430,7 @@ const handleSubmit = async () => {
 }
 
 .submit-button {
-  background: linear-gradient(135deg, #007bff, #0056b3);
+  background: linear-gradient(135deg, #1db2eb, #00d4ff);
   color: white;
   border: none;
   padding: 14px 24px;
@@ -428,16 +447,17 @@ const handleSubmit = async () => {
 }
 
 .submit-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #0056b3, #004085);
+  background: linear-gradient(135deg, #00d4ff, #1db2eb);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  box-shadow: 0 0 25px rgba(29, 178, 235, 0.6), 0 0 50px rgba(0, 212, 255, 0.4);
 }
 
 .submit-button:disabled {
-  background: #6c757d;
+  background: linear-gradient(135deg, rgba(29, 178, 235, 0.5), rgba(0, 212, 255, 0.5));
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+  opacity: 0.6;
 }
 
 .loading-spinner {
@@ -478,16 +498,16 @@ const handleSubmit = async () => {
   text-align: center;
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid #e1e5e9;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .login-link p {
-  color: #6c757d;
+  color: white;
   margin: 0;
 }
 
 .login-link a {
-  color: #007bff;
+  color: #4dd0e1;
   text-decoration: none;
   font-weight: 600;
 }

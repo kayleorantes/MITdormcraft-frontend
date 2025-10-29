@@ -20,14 +20,16 @@ const isLoggedIn = computed(() => authStore.isLoggedIn)
         
         <nav class="main-nav">
           <RouterLink to="/" class="nav-link">Home</RouterLink>
-          <RouterLink to="/register" class="nav-link">Register</RouterLink>
-          <RouterLink to="/login" class="nav-link">Login</RouterLink>
-          <RouterLink to="/about" class="nav-link">About</RouterLink>
+          <RouterLink to="/dorms" class="nav-link">Dorms & Layouts</RouterLink>
+          <RouterLink v-if="isLoggedIn" to="/create-post" class="nav-link">Create Post</RouterLink>
+          <RouterLink v-if="isLoggedIn" to="/profile" class="nav-link">My Profile</RouterLink>
+          <RouterLink v-if="!isLoggedIn" to="/register" class="nav-link">Register</RouterLink>
+          <RouterLink v-if="!isLoggedIn" to="/login" class="nav-link">Login</RouterLink>
         </nav>
         
         <!-- User info when logged in -->
         <div v-if="isLoggedIn" class="user-info">
-          <span class="welcome-text">Welcome, {{ authStore.username || 'User' }}!</span>
+          <span class="welcome-text">Hello, {{ authStore.username || 'User' }}!</span>
           <button @click="authStore.logout()" class="logout-btn">Logout</button>
         </div>
       </div>
@@ -47,10 +49,11 @@ const isLoggedIn = computed(() => authStore.isLoggedIn)
 }
 
 .app-header {
-  background: linear-gradient(135deg, #2c3e50, #34495e);
+  background: linear-gradient(135deg, #0a1a2e, #162447, #1f4068);
   color: white;
   padding: 20px 0;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(29, 178, 235, 0.3);
+  border-bottom: 2px solid rgba(29, 178, 235, 0.5);
 }
 
 .header-content {
@@ -100,13 +103,15 @@ const isLoggedIn = computed(() => authStore.isLoggedIn)
 }
 
 .nav-link:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(29, 178, 235, 0.3);
+  border-color: rgba(29, 178, 235, 0.5);
+  box-shadow: 0 0 15px rgba(29, 178, 235, 0.5);
 }
 
 .nav-link.router-link-active {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(29, 178, 235, 0.4);
+  border-color: rgba(29, 178, 235, 0.7);
+  box-shadow: 0 0 20px rgba(29, 178, 235, 0.6);
 }
 
 .user-info {
@@ -120,27 +125,31 @@ const isLoggedIn = computed(() => authStore.isLoggedIn)
   color: #ecf0f1;
   font-size: 14px;
   font-weight: 500;
+  padding: 6px 12px;
 }
 
 .logout-btn {
-  background: #e74c3c;
+  background: rgba(220, 53, 69, 0.8);
   color: white;
-  border: none;
+  border: 2px solid rgba(220, 53, 69, 0.6);
   padding: 6px 12px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .logout-btn:hover {
-  background: #c0392b;
+  background: rgba(220, 53, 69, 1);
+  border-color: rgba(255, 96, 107, 0.8);
+  box-shadow: 0 0 15px rgba(220, 53, 69, 0.5);
+  transform: translateY(-1px);
 }
 
 .app-main {
   flex: 1;
-  background: #f8f9fa;
+  background: transparent;
 }
 
 /* Responsive design */

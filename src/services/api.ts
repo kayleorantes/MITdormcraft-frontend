@@ -15,6 +15,7 @@ import type {
   UpdateUserProfileData,
   AuthResponse,
   PostResponse,
+  TemplateResponse,
   UserResponse,
   SuccessResponse,
   UpvoteResponse,
@@ -51,7 +52,7 @@ export const authAPI = {
 
 // Design Post API
 export const designPostAPI = {
-  // POST /api/design-post/createPost
+  // POST /api/design-post/createPost (trying kebab-case to match working endpoints)
   createPost: async (data: CreatePostData): Promise<PostResponse> => {
     const response = await api.post('/api/design-post/createPost', data)
     return response.data
@@ -90,33 +91,33 @@ export const designPostAPI = {
 
 // Engagement API
 export const engagementAPI = {
-  // GET /api/Engagement/getEngagementForPost
+  // GET /api/engagement/getEngagementForPost
   getEngagementForPost: async (postID: string): Promise<{ engagement: Engagement }> => {
-    const response = await api.get(`/api/Engagement/getEngagementForPost?postID=${postID}`)
+    const response = await api.get(`/api/engagement/getEngagementForPost?postID=${postID}`)
     return response.data
   },
 
-  // POST /api/Engagement/toggleUpvote
+  // POST /api/engagement/toggleUpvote
   toggleUpvote: async (data: ToggleUpvoteData): Promise<UpvoteResponse> => {
-    const response = await api.post('/api/Engagement/toggleUpvote', data)
+    const response = await api.post('/api/engagement/toggleUpvote', data)
     return response.data
   },
 
-  // POST /api/Engagement/addComment
+  // POST /api/engagement/addComment
   addComment: async (data: AddCommentData): Promise<CommentResponse> => {
-    const response = await api.post('/api/Engagement/addComment', data)
+    const response = await api.post('/api/engagement/addComment', data)
     return response.data
   },
 
-  // POST /api/Engagement/deleteComment
+  // POST /api/engagement/deleteComment
   deleteComment: async (data: DeleteCommentData): Promise<SuccessResponse> => {
-    const response = await api.post('/api/Engagement/deleteComment', data)
+    const response = await api.post('/api/engagement/deleteComment', data)
     return response.data
   },
 
-  // POST /api/Engagement/editComment
+  // POST /api/engagement/editComment
   editComment: async (data: EditCommentData): Promise<SuccessResponse> => {
-    const response = await api.post('/api/Engagement/editComment', data)
+    const response = await api.post('/api/engagement/editComment', data)
     return response.data
   },
 }
@@ -124,7 +125,7 @@ export const engagementAPI = {
 // Room Template API
 export const roomTemplateAPI = {
   // POST /api/room-template/addTemplate
-  addTemplate: async (data: AddTemplateData): Promise<PostResponse> => {
+  addTemplate: async (data: AddTemplateData): Promise<TemplateResponse> => {
     const response = await api.post('/api/room-template/addTemplate', data)
     return response.data
   },

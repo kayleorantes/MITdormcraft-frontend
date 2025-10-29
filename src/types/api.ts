@@ -50,6 +50,10 @@ export interface PostResponse {
   postID: string
 }
 
+export interface TemplateResponse {
+  templateID: string
+}
+
 export interface UserResponse {
   userID: string
 }
