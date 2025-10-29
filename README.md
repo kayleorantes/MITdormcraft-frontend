@@ -1,8 +1,8 @@
 # User Journey: The Videos!
 
-[![Watch the NEW 4B video](https://youtube.com/shorts/Tx_oDc2P1dM?feature=share)](https://youtube.com/shorts/Tx_oDc2P1dM?feature=share)
+[![Watch the NEW 4B video](https://youtu.be/NLE6hoRVIxQ)](https://youtu.be/NLE6hoRVIxQ)
 
-<a href="https://youtube.com/shorts/Tx_oDc2P1dM?feature=share" target="_blank" rel="noopener noreferrer">![Watch the video](https://img.youtube.com/vi/Tx_oDc2P1dM/0.jpg)</a>
+<a href="https://youtu.be/NLE6hoRVIxQ" target="_blank" rel="noopener noreferrer">![Watch the video](https://youtu.be/NLE6hoRVIxQ)</a>
 
 
 
