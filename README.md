@@ -38,7 +38,14 @@ This journey demonstrates the core features implemented: registering and logging
 <br>
 <br>
 
-# Frontend Design Updates - Ocean Theme
+
+# Your visual design study
+
+<img width="1300" height="728" alt="Screenshot 2025-10-28 at 11 48 53 PM" src="https://github.com/user-attachments/assets/0959dfa8-d176-401f-b13c-4159cd13e436" />
+<img width="1236" height="719" alt="Screenshot 2025-10-28 at 11 49 10 PM" src="https://github.com/user-attachments/assets/b31ea159-b239-4c43-a57e-e6bd34ba6996" />
+
+
+# Frontend Design Updates - Ocean Theme (also found in back-end repo summarizing major changes)
 
 ## Overview
 Major UI/UX overhaul implementing an "ocean-water-luminara" design theme across the entire application.
