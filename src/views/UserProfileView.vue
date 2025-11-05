@@ -811,49 +811,56 @@ const saveEditPost = async () => {
   try {
     // Update the post in myPosts
     const postIndex = myPosts.value.findIndex(p => p._id === editData._id)
-    if (postIndex !== -1) {
-      const post = myPosts.value[postIndex]
-      
-      // Update post data
-      post.title = editData.title || ''
-      post.description = ''
-      
-      // Handle image update
-      if (editData.imageURL && editData.imageURL !== post.imageURL) {
-        post.imageURL = editData.imageURL
-      }
-      
-      // Update template info if dorm/room type changed
-      const template = templateCache.value[post.templateID]
-      if (template && (editData.dormName || editData.roomType)) {
-        template.dormName = editData.dormName || template.dormName
-        template.roomType = editData.roomType || template.roomType
-      }
-      
-      // Update in localStorage
-      const localPosts = JSON.parse(localStorage.getItem('localPosts') || '[]')
-      const localIndex = localPosts.findIndex((p: any) => p._id === post._id)
-      if (localIndex !== -1) {
-        localPosts[localIndex] = post
-        localStorage.setItem('localPosts', JSON.stringify(localPosts))
-      }
-      
-      // Try to update via API
-      try {
-        await designPostAPI.editPost({
-          postID: post._id,
-          userID: authStore.userID!,
-          title: post.title,
-          description: '',
-          imageURL: post.imageURL
-        })
-      } catch (error) {
-        console.log('API edit failed, saved to localStorage:', error)
-      }
-      
-      alert('Post updated successfully!')
-      closeEditModal()
+    if (postIndex === -1) {
+      alert('Post not found')
+      return
     }
+    
+    const post = myPosts.value[postIndex]
+    if (!post) {
+      alert('Post not found')
+      return
+    }
+    
+    // Update post data
+    post.title = editData.title || ''
+    post.description = ''
+    
+    // Handle image update
+    if (editData.imageURL && editData.imageURL !== post.imageURL) {
+      post.imageURL = editData.imageURL
+    }
+    
+    // Update template info if dorm/room type changed
+    const template = templateCache.value[post.templateID]
+    if (template && (editData.dormName || editData.roomType)) {
+      template.dormName = editData.dormName || template.dormName
+      template.roomType = editData.roomType || template.roomType
+    }
+    
+    // Update in localStorage
+    const localPosts = JSON.parse(localStorage.getItem('localPosts') || '[]')
+    const localIndex = localPosts.findIndex((p: any) => p._id === post._id)
+    if (localIndex !== -1) {
+      localPosts[localIndex] = post
+      localStorage.setItem('localPosts', JSON.stringify(localPosts))
+    }
+    
+    // Try to update via API
+    try {
+      await designPostAPI.editPost({
+        postID: post._id,
+        userID: authStore.userID!,
+        title: post.title,
+        description: '',
+        imageURL: post.imageURL
+      })
+    } catch (error) {
+      console.log('API edit failed, saved to localStorage:', error)
+    }
+    
+    alert('Post updated successfully!')
+    closeEditModal()
   } catch (error) {
     console.error('Error saving post:', error)
     alert('Failed to update post. Please try again.')
