@@ -221,17 +221,22 @@ const loadPostsForTemplate = async (templateID: string) => {
   try {
     const response = await designPostAPI.findPostsByTemplate(templateID)
     posts.value = response || []
-    console.log(`Loaded posts for template ${templateID}:`, posts.value)
+    console.log(`Loaded ${posts.value.length} posts for template ${templateID}`)
     
-    // Load engagement data (comments and upvotes) for each post
-    await Promise.all(posts.value.map(async (post) => {
-      await loadEngagementForPost(post._id)
-    }))
+    // Show posts immediately, then load engagement in background
+    isLoadingPosts.value = false
+    
+    // Load engagement data (comments and upvotes) for each post in batches
+    // This prevents too many simultaneous requests and improves perceived performance
+    const batchSize = 5
+    for (let i = 0; i < posts.value.length; i += batchSize) {
+      const batch = posts.value.slice(i, i + batchSize)
+      await Promise.all(batch.map(post => loadEngagementForPost(post._id)))
+    }
   } catch (error: any) {
     console.error('Error loading posts:', error)
     errorMessage.value = error.response?.data?.error || error.message || 'Failed to load posts'
     posts.value = []
-  } finally {
     isLoadingPosts.value = false
   }
 }
@@ -239,7 +244,12 @@ const loadPostsForTemplate = async (templateID: string) => {
 // Load engagement data (comments and upvotes) for a specific post
 const loadEngagementForPost = async (postID: string) => {
   try {
+    const startTime = performance.now()
     const response = await engagementAPI.getEngagementForPost(postID)
+    const endTime = performance.now()
+    
+    console.log(`Loaded engagement for post ${postID} in ${Math.round(endTime - startTime)}ms`)
+    
     if (response.engagement) {
       postComments.value[postID] = response.engagement.comments || []
       
@@ -249,7 +259,7 @@ const loadEngagementForPost = async (postID: string) => {
       likedPosts.value[postID] = authStore.userID ? upvotes.includes(authStore.userID) : false
     }
   } catch (error) {
-    console.error(`Error loading engagement for post ${postID}:`, error)
+    console.warn(`Failed to load engagement for post ${postID}:`, error)
     // Initialize empty arrays if there's an error (backend not configured)
     postComments.value[postID] = []
     likeCounts.value[postID] = 0

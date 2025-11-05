@@ -19,9 +19,9 @@
       
       <div v-if="templates.length > 0" class="results">
         <h4>Found Templates:</h4>
-        <div v-for="template in templates" :key="template.templateID" class="template-item">
+        <div v-for="template in templates" :key="template._id" class="template-item">
           <strong>{{ template.dormName }} - {{ template.roomType }}</strong>
-          <small>(ID: {{ template.templateID }})</small>
+          <small>(ID: {{ template._id }})</small>
         </div>
       </div>
     </div>
@@ -39,7 +39,7 @@
       
       <div v-if="posts.length > 0" class="results">
         <h4>Found Posts:</h4>
-        <div v-for="post in posts" :key="post.postID" class="post-item">
+        <div v-for="post in posts" :key="post._id" class="post-item">
           <h5>{{ post.title }}</h5>
           <p>{{ post.description }}</p>
           <small>By: {{ post.authorID }} | Created: {{ post.createdAt }}</small>
@@ -112,7 +112,7 @@ const searchTemplates = async () => {
     if (templateFilters.value.dormName) filters.dormName = templateFilters.value.dormName
     if (templateFilters.value.roomType) filters.roomType = templateFilters.value.roomType
     
-    const response = await roomTemplateAPI.findTemplate(filters)
+    const response = await roomTemplateAPI.findTemplates(filters)
     templates.value = response || []
   } catch (err: any) {
     error.value = err.response?.data?.error || err.message || 'Failed to search templates'

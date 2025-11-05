@@ -287,9 +287,15 @@ const handleSubmit = async () => {
     const registrationData: RegisterData = {
       username: formData.username.trim(),
       mitKerberos: formData.mitKerberos.trim(),
-      bio: formData.bio.trim(),
+      bio: formData.bio.trim() || 'MIT student interested in dorm design',
       credential_data: formData.credential_data.trim(),
     }
+    
+    // Log the data being sent for debugging
+    console.log('Sending registration data:', {
+      ...registrationData,
+      credential_data: '***hidden***'
+    })
     
     // Call the auth store register method
     const result = await authStore.register(registrationData)
@@ -312,10 +318,12 @@ const handleSubmit = async () => {
     }
   } catch (error: any) {
     console.error('Registration error:', error)
+    console.error('Error response:', error.response)
     
     // Handle different types of errors
     if (error.response?.data?.error) {
       const errorMessage = error.response.data.error
+      console.error('Backend error message:', errorMessage)
       
       // Handle specific error cases
       if (errorMessage.includes('username') && errorMessage.includes('exist')) {
@@ -323,10 +331,14 @@ const handleSubmit = async () => {
       } else if (errorMessage.includes('mitKerberos') && errorMessage.includes('exist')) {
         errors.mitKerberos = 'This MIT Email is already registered'
       } else {
-        apiError.value = errorMessage
+        apiError.value = `Backend Error: ${errorMessage}`
       }
+    } else if (error.response?.status === 500) {
+      apiError.value = 'Internal server error. Please check if the backend is running correctly.'
+    } else if (error.message) {
+      apiError.value = `Error: ${error.message}`
     } else {
-      apiError.value = error.message || 'Registration failed. Please try again.'
+      apiError.value = 'Registration failed. Please try again.'
     }
   } finally {
     isLoading.value = false

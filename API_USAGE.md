@@ -2,15 +2,32 @@
 
 This document explains how to use the API service layer in the MIT DormCraft frontend application.
 
+## ⚠️ IMPORTANT: Backend Migration Update (Nov 2025)
+
+The API has been updated to work with the new **authentication sync-based backend**. All endpoints now:
+- Use **capitalized concept names** (e.g., `/api/Authentication/...`)
+- Use **POST requests** with JSON bodies (no more GET requests)
+- Include **automatic authentication headers** (`X-User-ID`)
+- Handle **401/403 errors** with automatic logout and redirect
+
+📖 **See [BACKEND_MIGRATION_GUIDE.md](./BACKEND_MIGRATION_GUIDE.md) for complete migration details**
+
 ## Overview
 
-The API service is located at `src/services/api.js` and provides a clean interface to all backend endpoints using Axios. The service is organized into logical modules:
+The API service is located at `src/services/api.ts` and provides a clean interface to all backend endpoints using Axios. The service is organized into logical modules:
 
 - **Authentication API** (`authAPI`) - User registration and login
 - **Design Post API** (`designPostAPI`) - Managing dorm room design posts
 - **Engagement API** (`engagementAPI`) - Upvotes and comments
 - **Room Template API** (`roomTemplateAPI`) - MIT dorm room templates
 - **User Account API** (`userAccountAPI`) - User profile management
+
+## Authentication
+
+The API service automatically includes authentication headers in all requests:
+- `X-User-ID` header is added from localStorage
+- No manual token management needed
+- Automatic logout on 401/403 errors
 
 ## Authentication Store
 
@@ -156,12 +173,31 @@ try {
 
 ## HTTP Methods
 
-- **GET methods**: Used for retrieving data (get, find operations)
-- **POST methods**: Used for creating, updating, and deleting data
+⚠️ **UPDATED:** All endpoints now use **POST methods** with JSON request bodies (as per Concept Engine specification).
+
+Previously GET endpoints (now POST):
+- `getPost`, `findPostsByTemplate`, `findPostsByAuthor`
+- `getEngagementForPost`
+- `getTemplate`, `findTemplate`
+- `getUser`, `getUserByUsername`
 
 ## Backend API Base URL
 
-The API service is configured to connect to `http://localhost:8000/api`. Make sure your backend server is running on this URL.
+The API service base URL is **configurable via environment variables**:
+
+1. Create a `.env` file:
+```bash
+VITE_API_BASE_URL=http://localhost:8000
+```
+
+2. For deployed backend:
+```bash
+VITE_API_BASE_URL=https://your-backend-app.onrender.com
+```
+
+3. Defaults to `http://localhost:8000` if not specified.
+
+📖 **See [ENV_SETUP.md](./ENV_SETUP.md) for detailed configuration instructions**
 
 ## State Management
 

@@ -193,7 +193,7 @@
                     :key="comment.commentID"
                     class="comment"
                   >
-                    <span class="comment-author">{{ comment.authorName || getCommentAuthorName(comment.authorID) }}</span>
+                    <span class="comment-author">{{ getCommentAuthorName(comment.authorID) }}</span>
                     <span class="comment-text">{{ comment.text }}</span>
                   </div>
                 </div>
@@ -764,7 +764,7 @@ const loadTemplateInfo = async (templateID: string) => {
           templateCache.value[templateID] = {
             _id: templateID,
             dormName: dormName,
-            roomType: roomType.charAt(0).toUpperCase() + roomType.slice(1)
+            roomType: roomType ? roomType.charAt(0).toUpperCase() + roomType.slice(1) : 'Unknown'
           }
           console.log(`Created fallback template for ${templateID}:`, templateCache.value[templateID])
         }
@@ -840,8 +840,8 @@ const loadEngagementFromStorage = (postId: string) => {
       // Cache usernames from comments
       if (postEngagement.comments) {
         for (const comment of postEngagement.comments) {
-          if (comment.authorName && comment.authorID) {
-            authorCache.value[comment.authorID] = comment.authorName
+          if (comment.authorID) {
+            authorCache.value[comment.authorID] = getCommentAuthorName(comment.authorID)
           }
         }
       }
@@ -908,7 +908,6 @@ const addComment = async (post: any, event: KeyboardEvent) => {
   const newComment = {
     commentID: Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9),
     authorID: authStore.userID,
-    authorName: authStore.username || 'MIT Student', // Store username
     text: commentText,
     createdAt: new Date().toISOString()
   }

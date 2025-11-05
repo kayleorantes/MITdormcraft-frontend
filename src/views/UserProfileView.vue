@@ -19,9 +19,9 @@
         <div class="profile-header">
           <div class="avatar-container">
             <img v-if="authStore.profileImageURL" :src="authStore.profileImageURL" alt="Profile" class="profile-avatar-image" />
-            <div v-else class="profile-avatar">{{ getInitial(authStore.username) }}</div>
+            <div v-else class="profile-avatar">{{ getInitial(authStore.username || 'User') }}</div>
             <input type="file" accept="image/*" @change="handleProfileImageChange" ref="profileImageInput" style="display: none;" />
-            <button class="edit-avatar-btn" @click="$refs.profileImageInput.click()" title="Change profile picture">
+            <button class="edit-avatar-btn" @click="triggerFileInput()" title="Change profile picture">
               ✏️
             </button>
           </div>
@@ -77,9 +77,9 @@
               <div class="post-header">
                 <div class="author-info">
                   <img v-if="authStore.profileImageURL" :src="authStore.profileImageURL" alt="Profile" class="author-avatar" />
-                  <div v-else class="author-avatar">{{ getInitial(authStore.username) }}</div>
+                  <div v-else class="author-avatar">{{ getInitial(authStore.username || 'User') }}</div>
                   <div class="author-details">
-                    <span class="author-name">{{ authStore.username }}</span>
+                    <span class="author-name">{{ authStore.username || 'User' }}</span>
                     <span class="post-location">{{ getPostLocation(post.templateID) }}</span>
                   </div>
                 </div>
@@ -132,7 +132,7 @@
                     :key="comment.commentID"
                     class="comment"
                   >
-                    <span class="comment-author">{{ comment.authorName || getCommentAuthorName(comment.authorID) }}</span>
+                    <span class="comment-author">{{ getCommentAuthorName(comment.authorID) }}</span>
                     <span class="comment-text">{{ comment.text }}</span>
                   </div>
                 </div>
@@ -219,7 +219,7 @@
                     :key="comment.commentID"
                     class="comment"
                   >
-                    <span class="comment-author">{{ comment.authorName || getCommentAuthorName(comment.authorID) }}</span>
+                    <span class="comment-author">{{ getCommentAuthorName(comment.authorID) }}</span>
                     <span class="comment-text">{{ comment.text }}</span>
                   </div>
                 </div>
@@ -312,6 +312,9 @@ import type { DesignPost, Comment, RoomTemplate } from '@/types/api'
 
 const authStore = useAuthStore()
 
+// Refs
+const profileImageInput = ref<HTMLInputElement | null>(null)
+
 const isLoading = ref(false)
 const activeTab = ref<'my-posts' | 'liked'>('my-posts')
 const myPosts = ref<DesignPost[]>([])
@@ -394,11 +397,7 @@ const loadMyPosts = async () => {
     // Load engagement data for each post
     for (const post of uniquePosts) {
       await loadEngagementForPost(post._id)
-      if (post.template) {
-        templateCache.value[post.template._id] = post.template
-      } else {
-        await loadTemplateInfo(post.templateID)
-      }
+      await loadTemplateInfo(post.templateID)
     }
   } catch (error) {
     console.error('Error loading my posts:', error)
@@ -443,11 +442,7 @@ const loadAllPosts = async () => {
     // Load engagement for all posts
     for (const post of uniquePosts) {
       await loadEngagementForPost(post._id)
-      if (post.template) {
-        templateCache.value[post.template._id] = post.template
-      } else {
-        await loadTemplateInfo(post.templateID)
-      }
+      await loadTemplateInfo(post.templateID)
     }
     
     // Filter liked posts
@@ -685,6 +680,7 @@ const addComment = async (post: any, event: KeyboardEvent) => {
   
   // Try to save to API as well
   try {
+    if (!authStore.userID) return
     const response = await engagementAPI.addComment({
       postID: postId,
       authorID: authStore.userID,
@@ -701,6 +697,11 @@ const addComment = async (post: any, event: KeyboardEvent) => {
   } catch (error: any) {
     console.log('API addComment failed, using localStorage:', error.message)
   }
+}
+
+// Trigger file input click
+const triggerFileInput = () => {
+  profileImageInput.value?.click()
 }
 
 // Compress image helper
@@ -750,8 +751,13 @@ const openEditModal = (post: DesignPost) => {
     _id: post._id,
     title: post.title,
     imageURL: post.imageURL,
-    dormName: post.template?.dormName || '',
-    roomType: post.template?.roomType || ''
+    dormName: '',
+    roomType: ''
+  }
+  const template = templateCache.value[post.templateID]
+  if (template) {
+    editData.dormName = template.dormName
+    editData.roomType = template.roomType
   }
   editingPost.value = editData
   imagePreviewEdit.value = null
@@ -818,9 +824,10 @@ const saveEditPost = async () => {
       }
       
       // Update template info if dorm/room type changed
-      if (post.template && (editData.dormName || editData.roomType)) {
-        post.template.dormName = editData.dormName || post.template.dormName
-        post.template.roomType = editData.roomType || post.template.roomType
+      const template = templateCache.value[post.templateID]
+      if (template && (editData.dormName || editData.roomType)) {
+        template.dormName = editData.dormName || template.dormName
+        template.roomType = editData.roomType || template.roomType
       }
       
       // Update in localStorage
@@ -902,7 +909,11 @@ const deletePost = async (postID: string) => {
     
     // Try to call API
     try {
-      await designPostAPI.deletePost(postID)
+      if (!authStore.userID) return
+      await designPostAPI.deletePost({
+        postID: postID,
+        userID: authStore.userID
+      })
     } catch (error) {
       console.log('API delete failed, removed from localStorage:', error)
     }
