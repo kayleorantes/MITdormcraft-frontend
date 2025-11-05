@@ -1,4 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import HomeView from '../views/HomeView.vue'
+import Register from '../components/Register.vue'
+import Login from '../components/Login.vue'
+import Feed from '../components/Feed.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,31 +15,25 @@ const router = createRouter({
     return { top: 0 }
   },
   routes: [
-    // Keep routes in sync with navigation
-    {
-      path: '/feed',
-      name: 'feed',
-      component: () => import('../components/Feed.vue'),
-    },
     {
       path: '/',
       name: 'home',
-      component: () => import('../views/HomeView.vue'),
-    },
-    {
-      path: '/feed',
-      name: 'feed',
-      component: () => import('../components/Feed.vue'),
+      component: HomeView,
     },
     {
       path: '/register',
       name: 'register',
-      component: () => import('../components/Register.vue'),
+      component: Register,
     },
     {
       path: '/login',
       name: 'login',
-      component: () => import('../components/Login.vue'),
+      component: Login,
+    },
+    {
+      path: '/feed',
+      name: 'feed',
+      component: Feed,
     },
     {
       path: '/dorms',
