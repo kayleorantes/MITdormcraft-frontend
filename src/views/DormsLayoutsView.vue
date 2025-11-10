@@ -756,7 +756,7 @@ const loadTemplateInfo = async (templateID: string) => {
       if (templateID.includes('-')) {
         const parts = templateID.split('-')
         if (parts.length >= 2) {
-          const roomType = parts[parts.length - 1]
+          const roomType = parts[parts.length - 1] || 'unknown'
           const dormName = parts.slice(0, -1).map(p => 
             p.charAt(0).toUpperCase() + p.slice(1)
           ).join(' ')
@@ -764,7 +764,7 @@ const loadTemplateInfo = async (templateID: string) => {
           templateCache.value[templateID] = {
             _id: templateID,
             dormName: dormName,
-            roomType: roomType ? roomType.charAt(0).toUpperCase() + roomType.slice(1) : 'Unknown'
+            roomType: roomType.charAt(0).toUpperCase() + roomType.slice(1)
           }
           console.log(`Created fallback template for ${templateID}:`, templateCache.value[templateID])
         }

@@ -18,6 +18,9 @@ coverage
 .env
 .env.local
 .env.*.local
+# Keep .env.development and .env.production in repo
+!.env.development
+!.env.production
 
 /cypress/videos/
 /cypress/screenshots/
