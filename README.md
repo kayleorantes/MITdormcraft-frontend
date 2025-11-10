@@ -1,3 +1,31 @@
+# 🎓 Assignment 4c Resources
+
+**Ready to complete Assignment 4c?** Start here:
+
+📖 **[ASSIGNMENT_4C_COMPLETION_GUIDE.md](./ASSIGNMENT_4C_COMPLETION_GUIDE.md)** - Master checklist and overview
+
+### 📚 Documentation Templates (Copy to Backend Repo)
+- **[DESIGN_DOCUMENT_4C.md](./DESIGN_DOCUMENT_4C.md)** - Template for design document
+- **[REFLECTIONS_4C.md](./REFLECTIONS_4C.md)** - Template for reflections
+
+### 🚀 Step-by-Step Guides
+- **[DEPLOYMENT_CHECKLIST_4C.md](./DEPLOYMENT_CHECKLIST_4C.md)** - Complete deployment guide
+- **[VIDEO_AND_TRACE_INSTRUCTIONS.md](./VIDEO_AND_TRACE_INSTRUCTIONS.md)** - How to make demo video
+- **[BACKEND_SYNCS_DOCUMENTATION_GUIDE.md](./BACKEND_SYNCS_DOCUMENTATION_GUIDE.md)** - Document your syncs
+
+### ⚙️ Reference Guides
+- **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Detailed Render deployment
+- **[START_HERE.md](./START_HERE.md)** - Quick start for development
+- **[API_CONFIG.md](./API_CONFIG.md)** - API configuration reference
+
+---
+
+**Backend Repository:** https://github.com/kayleorantes/MITdormcraft
+
+**All deliverables (design doc, reflections, trace) should go in the backend repository.**
+
+---
+
 # User Journey: The Videos!
 
 [![Watch the NEW 4B video](https://youtu.be/NLE6hoRVIxQ)](https://youtu.be/NLE6hoRVIxQ)
