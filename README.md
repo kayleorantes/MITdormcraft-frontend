@@ -1,3 +1,39 @@
+# MITDormCraft Frontend 🏠✨
+
+A social platform where MIT students share and discover dorm room design inspiration.
+
+## 🌐 Live Deployment
+
+- **Frontend:** Coming soon (deploy to Render)
+- **Backend:** https://mit-dormcraft-backend.onrender.com
+- **Backend Repository:** https://github.com/kayleorantes/MITdormcraft
+
+---
+
+## 🚀 Quick Start
+
+### Local Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server (backend must be running on localhost:8000)
+npm run dev
+```
+
+### Production Build
+
+```bash
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+---
+
 # 🎓 Assignment 4c Resources
 
 **Ready to complete Assignment 4c?** Start here:
