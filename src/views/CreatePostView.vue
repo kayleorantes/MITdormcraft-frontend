@@ -407,70 +407,36 @@ const handleSubmit = async () => {
       imageLength: imageURL.length
     })
     
-    // Generate a post ID - use API response if available, otherwise local
-    let apiPostID = null
-    
-    // Try to create via API first
-    try {
-      const response = await designPostAPI.createPost({
-        authorID: authStore.userID!,
-        templateID: template._id,
-        title: formData.title.trim(),
-        description: '',
-        imageURL: imageURL
-      })
-      
-      console.log('Post creation API response:', response)
-      
-      // Extract postID from response
-      if (typeof response === 'string') {
-        apiPostID = response
-      } else if (response) {
-        apiPostID = response.postID || (response as any)._id || (response as any).id || (response as any).post?._id
-      }
-      
-      console.log('Extracted API postID:', apiPostID)
-    } catch (apiError: any) {
-      console.log('API create post failed:', apiError.message)
-    }
-    
-    // Use API postID if we got one, otherwise generate a local one
-    const postID = apiPostID || `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-    
-    // ALWAYS save to localStorage so it's visible
-    const newPost = {
-      _id: postID,
+    // Create post via API - no localStorage fallback
+    console.log('Creating post via API...')
+    const response = await designPostAPI.createPost({
       authorID: authStore.userID!,
       templateID: template._id,
       title: formData.title.trim(),
       description: '',
-      imageURL: imageURL,
-      createdAt: new Date().toISOString(),
-      template: {
-        _id: template._id,
-        dormName: template.dormName,
-        roomType: template.roomType
-      }
+      imageURL: imageURL
+    })
+    
+    console.log('Post creation API response:', response)
+    
+    // Extract postID from response
+    let postID = null
+    if (typeof response === 'string') {
+      postID = response
+    } else if (response) {
+      postID = response.postID || (response as any)._id || (response as any).id || (response as any).post?._id
     }
     
-    try {
-      const localPosts = JSON.parse(localStorage.getItem('localPosts') || '[]')
-      // Remove any existing post with this ID to avoid duplicates
-      const filteredPosts = localPosts.filter((p: any) => p._id !== postID)
-      filteredPosts.push(newPost)
-      localStorage.setItem('localPosts', JSON.stringify(filteredPosts))
-      console.log('Post saved to local storage:', postID)
-      console.log('Total posts in localStorage:', filteredPosts.length)
-    } catch (storageError: any) {
-      console.error('Failed to save to localStorage:', storageError.message)
+    if (!postID) {
+      throw new Error('Failed to get post ID from backend response')
     }
     
-    successMessage.value = `Post created successfully! (ID: ${postID.substring(0, 12)}...) ${apiPostID ? '[API+Local]' : '[Local Only]'} Redirecting...`
-    console.log('Post created with ID:', postID)
+    console.log('Post created successfully with ID:', postID)
+    successMessage.value = `Post created successfully! Redirecting...`
     
-    // Wait longer to ensure the backend has fully persisted the post
+    // Wait a moment to ensure the backend has fully persisted the post
     setTimeout(() => {
-      // Redirect to dorms page and force a full refresh
+      // Redirect to dorms page
       router.push('/dorms')
     }, 1500)
     

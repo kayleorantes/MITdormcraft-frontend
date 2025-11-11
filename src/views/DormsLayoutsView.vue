@@ -353,26 +353,7 @@ const loadAllPosts = async () => {
       console.error('Error loading templates:', error)
     }
     
-    // Approach 2: Load posts from local storage (fallback for when API doesn't work)
-    try {
-      const localPosts = JSON.parse(localStorage.getItem('localPosts') || '[]')
-      console.log(`Found ${localPosts.length} posts in local storage`)
-      
-      for (const post of localPosts) {
-        if (!seenPostIds.has(post._id)) {
-          seenPostIds.add(post._id)
-          allPosts.push(post)
-          console.log(`Added local storage post: ${post.title} (${post._id})`)
-          
-          // Add template to cache if we have it
-          if (post.template) {
-            templateCache.value[post.template._id] = post.template
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error loading posts from local storage:', error)
-    }
+    // Approach 2: Removed localStorage fallback - posts must come from backend API
     
     // Approach 3: If we have a logged-in user, try to load their posts directly
     if (authStore.userID) {
@@ -573,49 +554,7 @@ const loadFilteredPosts = async () => {
     
     allPosts.push(...matchingSamplePosts)
     
-    // Load posts from localStorage and filter them
-    try {
-      const localPosts = JSON.parse(localStorage.getItem('localPosts') || '[]')
-      console.log(`Found ${localPosts.length} posts in localStorage for filtering`)
-      
-      for (const post of localPosts) {
-        // Check if post's template matches the selected filters
-        let postMatches = false
-        
-        if (post.template) {
-          // Post has template info embedded
-          const matchesDorm = selectedDorms.value.length === 0 || selectedDorms.value.includes(post.template.dormName)
-          const matchesRoomType = selectedRoomTypes.value.length === 0 || selectedRoomTypes.value.includes(post.template.roomType)
-          postMatches = matchesDorm && matchesRoomType
-          
-          // Add template to cache
-          templateCache.value[post.templateID] = post.template
-        } else {
-          // Try to find template info
-          const template = templateCache.value[post.templateID] || 
-                          matchingTemplates.find(t => t._id === post.templateID) ||
-                          matchingSampleTemplates.find(t => t._id === post.templateID)
-          
-          if (template) {
-            const matchesDorm = selectedDorms.value.length === 0 || selectedDorms.value.includes(template.dormName)
-            const matchesRoomType = selectedRoomTypes.value.length === 0 || selectedRoomTypes.value.includes(template.roomType)
-            postMatches = matchesDorm && matchesRoomType
-            
-            templateCache.value[post.templateID] = template
-          } else {
-            // No template info available, check against all filters
-            postMatches = selectedDorms.value.length === 0 && selectedRoomTypes.value.length === 0
-          }
-        }
-        
-        if (postMatches) {
-          allPosts.push(post)
-          console.log(`Added local post to filtered results: ${post.title}`)
-        }
-      }
-    } catch (error) {
-      console.error('Error loading posts from localStorage for filtering:', error)
-    }
+    // Removed localStorage fallback - all posts must come from backend API
     
     // Sort posts by creation date (newest first)
     allPosts.sort((a, b) => {
