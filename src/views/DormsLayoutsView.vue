@@ -355,86 +355,25 @@ const fetchAuthorName = async (authorID: string) => {
 const loadAllPosts = async () => {
   isLoadingPosts.value = true
   try {
-    console.log('Loading all posts...')
+    console.log('Loading all posts using new findPosts endpoint...')
     
-    // Strategy: Try multiple approaches to get all posts
-    const allPosts: DesignPost[] = []
-    const seenPostIds = new Set<string>()
+    // Use the new findPosts endpoint to get all posts (up to 1000 most recent)
+    const allPosts = await designPostAPI.findPosts({})
+    console.log(`Loaded ${allPosts.length} posts from findPosts endpoint`)
+    console.log('Sample post data:', allPosts.length > 0 ? allPosts[0] : 'No posts')
     
-    // Approach 1: Load posts for each known template
-    try {
-      const allTemplates = await roomTemplateAPI.findTemplates({})
-      console.log('Found templates:', allTemplates.length)
-      
-      for (const template of allTemplates) {
-        try {
-          const templatePosts = await designPostAPI.findPostsByTemplate(template._id)
-          console.log(`Template ${template.dormName} - ${template.roomType}: ${templatePosts.length} posts`)
-          
-          // Add template to cache
-          templateCache.value[template._id] = template
-          
-          // Add posts, avoiding duplicates
-          for (const post of templatePosts) {
-            if (!seenPostIds.has(post._id)) {
-              seenPostIds.add(post._id)
-              allPosts.push(post)
-              // Fetch author name for this post
-              await fetchAuthorName(post.authorID)
-            }
-          }
-        } catch (error) {
-          console.error(`Error loading posts for template ${template._id}:`, error)
-        }
-      }
-    } catch (error) {
-      console.error('Error loading templates:', error)
-    }
-    
-    // Approach 2: Removed localStorage fallback - posts must come from backend API
-    
-    // Approach 3: If we have a logged-in user, try to load their posts directly
-    if (authStore.userID) {
-      try {
-        console.log(`Loading posts for user: ${authStore.userID}`)
-        const userPosts = await designPostAPI.findPostsByAuthor(authStore.userID)
-        console.log(`Found ${userPosts.length} posts by current user:`, userPosts.map(p => ({ id: p._id, title: p.title })))
-        
-        // Add user's posts, avoiding duplicates
-        for (const post of userPosts) {
-          if (!seenPostIds.has(post._id)) {
-            seenPostIds.add(post._id)
-            allPosts.push(post)
-            console.log(`Added user post: ${post.title} (${post._id})`)
-            
-            // Try to load template info for this post
-            await loadTemplateInfo(post.templateID)
-          } else {
-            console.log(`Skipping duplicate post: ${post.title} (${post._id})`)
-          }
-        }
-      } catch (error: any) {
-        console.error('Error loading user posts:', error)
-        console.error('Error details:', error.response?.data)
-      }
-    } else {
-      console.log('No user logged in, skipping user posts')
-    }
-    
-    // Sort posts by creation date (newest first)
-    allPosts.sort((a, b) => {
-      const dateA = new Date(a.createdAt).getTime()
-      const dateB = new Date(b.createdAt).getTime()
-      return dateB - dateA
-    })
-    
-    console.log('Total unique posts loaded:', allPosts.length)
-    
-    // Always show real posts if we have them
-    // Add sample posts alongside (not as replacement) for demo purposes
+    // SET POSTS IMMEDIATELY so they show up in UI
     if (allPosts.length > 0) {
-      console.log('Showing real posts (sample posts hidden)')
+      console.log('Showing real posts')
       posts.value = allPosts
+      isLoadingPosts.value = false // Stop loading spinner immediately
+      
+      // Load template info and engagement in background
+      for (const post of allPosts) {
+        loadTemplateInfo(post.templateID).catch(err => console.error('Error loading template:', err))
+        fetchAuthorName(post.authorID).catch(err => console.error('Error loading author:', err))
+        loadEngagementForPost(post._id).catch(err => console.error('Error loading engagement:', err))
+      }
     } else {
       // Only show sample posts if we have NO real posts
       console.log('No real posts found, showing sample posts as fallback')
@@ -443,6 +382,7 @@ const loadAllPosts = async () => {
         templateCache.value[t._id] = t
       })
       posts.value = getSamplePosts()
+      isLoadingPosts.value = false
       
       // Initialize sample post engagement data
       posts.value.forEach(post => {
@@ -451,16 +391,10 @@ const loadAllPosts = async () => {
         likedPosts.value[post._id] = false
       })
     }
-    
-    // Load engagement data for real posts only (sample posts already have it)
-    const realPosts = posts.value.filter(post => !post._id.startsWith('sample-'))
-    if (realPosts.length > 0) {
-      await Promise.all(realPosts.map(async (post) => {
-        await loadEngagementForPost(post._id)
-      }))
-    }
   } catch (error: any) {
     console.error('Error loading all posts:', error)
+    console.error('Error details:', error.response?.data || error.message)
+    isLoadingPosts.value = false
     // On error, load sample posts
     const sampleTemplates = getSampleTemplates()
     sampleTemplates.forEach(t => {
@@ -473,8 +407,6 @@ const loadAllPosts = async () => {
       likedPosts.value[post._id] = false
     })
     posts.value = samplePosts
-  } finally {
-    isLoadingPosts.value = false
   }
 }
 

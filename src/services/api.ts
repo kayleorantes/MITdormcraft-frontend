@@ -141,7 +141,12 @@ export const designPostAPI = {
     const response = await api.post("/DesignPost/findPostsByTemplate", {
       templateID,
     });
-    return response.data;
+    // Transform postID to _id if needed
+    const posts = response.data;
+    return posts.map((post: any) => ({
+      ...post,
+      _id: post._id || post.postID,
+    }));
   },
 
   // POST /api/DesignPost/findPostsByAuthor
@@ -149,7 +154,23 @@ export const designPostAPI = {
     const response = await api.post("/DesignPost/findPostsByAuthor", {
       authorID,
     });
-    return response.data;
+    // Transform postID to _id if needed
+    const posts = response.data;
+    return posts.map((post: any) => ({
+      ...post,
+      _id: post._id || post.postID,
+    }));
+  },
+
+  // POST /api/DesignPost/findPosts
+  findPosts: async (options: { limit?: number } = {}): Promise<DesignPost[]> => {
+    const response = await api.post("/DesignPost/findPosts", options);
+    // Transform postID to _id if needed
+    const posts = response.data;
+    return posts.map((post: any) => ({
+      ...post,
+      _id: post._id || post.postID,
+    }));
   },
 
   // POST /api/DesignPost/editPost

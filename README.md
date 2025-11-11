@@ -2,6 +2,19 @@
 
 A social platform where MIT students share and discover dorm room design inspiration.
 
+## 🔒 Privacy-Focused Design
+
+MIT DormCraft is built with **privacy and anonymity** at its core:
+
+- **Anonymous Interactions**: All users remain completely anonymous to each other
+- **No Direct Messaging**: There is no direct user-to-user interaction or messaging
+- **Private Engagement**: You can freely like and comment on posts without revealing your identity
+- **Safe Community**: Share your dorm room designs and engage with the community in a secure, private environment
+
+Users can view and interact with content anonymously, ensuring a comfortable space to share ideas without concerns about personal privacy.
+
+---
+
 ## 🌐 Live Deployment
 
 - **Frontend:** Coming soon (deploy to Render)

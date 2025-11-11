@@ -407,46 +407,22 @@ const loadMyPosts = async () => {
 // Load all posts to find liked ones
 const loadAllPosts = async () => {
   try {
-    const posts: DesignPost[] = []
+    console.log('Loading all posts using new findPosts endpoint...')
     
-    // Load from API
-    try {
-      const allTemplates = await roomTemplateAPI.findTemplates({})
-      for (const template of allTemplates) {
-        try {
-          const templatePosts = await designPostAPI.findPostsByTemplate(template._id)
-          posts.push(...templatePosts)
-        } catch (error) {
-          console.error(`Error loading posts for template ${template._id}:`, error)
-        }
-      }
-    } catch (error) {
-      console.log('Error loading posts from API, trying localStorage')
+    // Use the new findPosts endpoint to get all posts (up to 1000 most recent)
+    const posts = await designPostAPI.findPosts({})
+    console.log(`Loaded ${posts.length} posts from findPosts endpoint`)
+    
+    allPosts.value = posts
+    
+    // Filter liked posts immediately (engagement data will be loaded from storage first)
+    likedPosts.value = posts.filter(post => likedPostsMap.value[post._id])
+    
+    // Load engagement and template info in background
+    for (const post of posts) {
+      loadEngagementForPost(post._id).catch(err => console.error('Error loading engagement:', err))
+      loadTemplateInfo(post.templateID).catch(err => console.error('Error loading template:', err))
     }
-    
-    // Also load from localStorage
-    try {
-      const localPosts = JSON.parse(localStorage.getItem('localPosts') || '[]')
-      posts.push(...localPosts)
-    } catch (error) {
-      console.error('Error loading posts from localStorage:', error)
-    }
-    
-    // Remove duplicates
-    const uniquePosts = posts.filter((post, index, self) => 
-      index === self.findIndex((p) => p._id === post._id)
-    )
-    
-    allPosts.value = uniquePosts
-    
-    // Load engagement for all posts
-    for (const post of uniquePosts) {
-      await loadEngagementForPost(post._id)
-      await loadTemplateInfo(post.templateID)
-    }
-    
-    // Filter liked posts
-    likedPosts.value = uniquePosts.filter(post => likedPostsMap.value[post._id])
   } catch (error) {
     console.error('Error loading all posts:', error)
   }

@@ -19,6 +19,17 @@ import { RouterLink } from 'vue-router'
             MIT DormCraft is designed specifically for MIT students to share, discover, and create inspiring dorm room designs.
           </p>
           
+          <div class="privacy-highlight">
+            <div class="privacy-icon">🔒</div>
+            <h3>Privacy-Focused Design</h3>
+            <p>
+              Your privacy matters. MIT DormCraft is built with anonymity at its core. All users remain completely 
+              anonymous to each other—you can freely like and comment on posts without revealing your identity. 
+              There's no direct user-to-user messaging or interaction, ensuring you can share and engage with the 
+              community in a safe, private environment.
+            </p>
+          </div>
+          
           <h3>Why MIT DormCraft?</h3>
           <div class="features-grid">
             <div class="feature">
@@ -140,6 +151,35 @@ h1 {
   font-size: 16px;
   line-height: 1.8;
   margin-bottom: 20px;
+}
+
+.privacy-highlight {
+  background: linear-gradient(135deg, #0a1a2e 0%, #162447 50%, #1f4068 100%);
+  padding: 30px;
+  border-radius: 12px;
+  margin: 30px 0;
+  text-align: center;
+  border: 2px solid rgba(29, 178, 235, 0.4);
+  box-shadow: 0 4px 20px rgba(29, 178, 235, 0.2);
+}
+
+.privacy-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+
+.privacy-highlight h3 {
+  color: white;
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 26px;
+}
+
+.privacy-highlight p {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 16px;
+  line-height: 1.8;
+  margin-bottom: 0;
 }
 
 .features-grid {
