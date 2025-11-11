@@ -82,13 +82,13 @@ api.interceptors.response.use(
 export const authAPI = {
   // POST /api/Authentication/registerAndCreateAccount
   registerAndCreateAccount: async (data: RegisterData): Promise<UserResponse> => {
-    const response = await api.post('/api/Authentication/registerAndCreateAccount', data)
+    const response = await api.post('/Authentication/registerAndCreateAccount', data)
     return response.data
   },
 
   // POST /api/Authentication/verifyCredentials
   verifyCredentials: async (data: LoginData): Promise<AuthResponse> => {
-    const response = await api.post('/api/Authentication/verifyCredentials', data)
+    const response = await api.post('/Authentication/verifyCredentials', data)
     return response.data
   },
 }
@@ -97,37 +97,37 @@ export const authAPI = {
 export const designPostAPI = {
   // POST /api/DesignPost/createPost
   createPost: async (data: CreatePostData): Promise<PostResponse> => {
-    const response = await api.post('/api/DesignPost/createPost', data)
+    const response = await api.post('/DesignPost/createPost', data)
     return response.data
   },
 
   // POST /api/DesignPost/getPost
   getPost: async (postID: string): Promise<{ post: DesignPost | null }> => {
-    const response = await api.post('/api/DesignPost/getPost', { postID })
+    const response = await api.post('/DesignPost/getPost', { postID })
     return response.data
   },
 
   // POST /api/DesignPost/findPostsByTemplate
   findPostsByTemplate: async (templateID: string): Promise<DesignPost[]> => {
-    const response = await api.post('/api/DesignPost/findPostsByTemplate', { templateID })
+    const response = await api.post('/DesignPost/findPostsByTemplate', { templateID })
     return response.data
   },
 
   // POST /api/DesignPost/findPostsByAuthor
   findPostsByAuthor: async (authorID: string): Promise<DesignPost[]> => {
-    const response = await api.post('/api/DesignPost/findPostsByAuthor', { authorID })
+    const response = await api.post('/DesignPost/findPostsByAuthor', { authorID })
     return response.data
   },
 
   // POST /api/DesignPost/editPost
   editPost: async (data: EditPostData): Promise<SuccessResponse> => {
-    const response = await api.post('/api/DesignPost/editPost', data)
+    const response = await api.post('/DesignPost/editPost', data)
     return response.data
   },
 
   // POST /api/DesignPost/deletePost
   deletePost: async (data: DeletePostData): Promise<SuccessResponse> => {
-    const response = await api.post('/api/DesignPost/deletePost', data)
+    const response = await api.post('/DesignPost/deletePost', data)
     return response.data
   },
 }
@@ -136,31 +136,31 @@ export const designPostAPI = {
 export const engagementAPI = {
   // POST /api/Engagement/getEngagementForPost
   getEngagementForPost: async (postID: string): Promise<{ engagement: Engagement }> => {
-    const response = await api.post('/api/Engagement/getEngagementForPost', { postID })
+    const response = await api.post('/Engagement/getEngagementForPost', { postID })
     return response.data
   },
 
   // POST /api/Engagement/toggleUpvote
   toggleUpvote: async (data: ToggleUpvoteData): Promise<UpvoteResponse> => {
-    const response = await api.post('/api/Engagement/toggleUpvote', data)
+    const response = await api.post('/Engagement/toggleUpvote', data)
     return response.data
   },
 
   // POST /api/Engagement/addComment
   addComment: async (data: AddCommentData): Promise<CommentResponse> => {
-    const response = await api.post('/api/Engagement/addComment', data)
+    const response = await api.post('/Engagement/addComment', data)
     return response.data
   },
 
   // POST /api/Engagement/deleteComment
   deleteComment: async (data: DeleteCommentData): Promise<SuccessResponse> => {
-    const response = await api.post('/api/Engagement/deleteComment', data)
+    const response = await api.post('/Engagement/deleteComment', data)
     return response.data
   },
 
   // POST /api/Engagement/editComment
   editComment: async (data: EditCommentData): Promise<SuccessResponse> => {
-    const response = await api.post('/api/Engagement/editComment', data)
+    const response = await api.post('/Engagement/editComment', data)
     return response.data
   },
 }
@@ -169,31 +169,31 @@ export const engagementAPI = {
 export const roomTemplateAPI = {
   // POST /api/RoomTemplate/addTemplate
   addTemplate: async (data: AddTemplateData): Promise<TemplateResponse> => {
-    const response = await api.post('/api/RoomTemplate/addTemplate', data)
+    const response = await api.post('/RoomTemplate/addTemplate', data)
     return response.data
   },
 
   // POST /api/RoomTemplate/getTemplate
   getTemplate: async (templateID: string): Promise<{ template: RoomTemplate | null }> => {
-    const response = await api.post('/api/RoomTemplate/getTemplate', { templateID })
+    const response = await api.post('/RoomTemplate/getTemplate', { templateID })
     return response.data
   },
 
   // POST /api/RoomTemplate/findTemplates
   findTemplates: async (filters: TemplateFilters = {}): Promise<RoomTemplate[]> => {
-    const response = await api.post('/api/RoomTemplate/findTemplates', filters)
+    const response = await api.post('/RoomTemplate/findTemplates', filters)
     return response.data
   },
 
   // POST /api/RoomTemplate/updateTemplate
   updateTemplate: async (data: UpdateTemplateData): Promise<SuccessResponse> => {
-    const response = await api.post('/api/RoomTemplate/updateTemplate', data)
+    const response = await api.post('/RoomTemplate/updateTemplate', data)
     return response.data
   },
 
   // POST /api/RoomTemplate/deleteTemplate
   deleteTemplate: async (data: { templateID: string }): Promise<SuccessResponse> => {
-    const response = await api.post('/api/RoomTemplate/deleteTemplate', data)
+    const response = await api.post('/RoomTemplate/deleteTemplate', data)
     return response.data
   },
 }
@@ -202,19 +202,19 @@ export const roomTemplateAPI = {
 export const userAccountAPI = {
   // POST /api/UserAccount/getUser
   getUser: async (userID: string): Promise<{ user: User }> => {
-    const response = await api.post('/api/UserAccount/getUser', { userID })
+    const response = await api.post('/UserAccount/getUser', { userID })
     return response.data
   },
 
   // POST /api/UserAccount/getUserByUsername
   getUserByUsername: async (username: string): Promise<{ user: User }> => {
-    const response = await api.post('/api/UserAccount/getUserByUsername', { username })
+    const response = await api.post('/UserAccount/getUserByUsername', { username })
     return response.data
   },
 
   // POST /api/UserAccount/updateUserProfile
   updateUserProfile: async (data: UpdateUserProfileData): Promise<SuccessResponse> => {
-    const response = await api.post('/api/UserAccount/updateUserProfile', data)
+    const response = await api.post('/UserAccount/updateUserProfile', data)
     return response.data
   },
 }
