@@ -461,12 +461,29 @@ const loadEngagementForPost = async (postID: string) => {
   try {
     const response = await engagementAPI.getEngagementForPost(postID)
     if (response.engagement) {
-      postComments.value[postID] = response.engagement.comments || []
-      const upvotes = response.engagement.upvotes || []
-      likeCounts.value[postID] = upvotes.length
+      const engagement = response.engagement
+      postComments.value[postID] = engagement.comments || []
+      const upvotes = engagement.upvotes || []
+      const likeCount = typeof engagement.upvoteCount === 'number'
+        ? engagement.upvoteCount
+        : upvotes.length
+      likeCounts.value[postID] = likeCount
+      
+      // Fetch author names for all comments
+      for (const comment of engagement.comments || []) {
+        if (comment.authorID) {
+          await fetchAuthorName(comment.authorID)
+        }
+      }
       
       if (authStore.userID) {
-        likedPostsMap.value[postID] = upvotes.includes(authStore.userID)
+        if (upvotes.includes(authStore.userID)) {
+          likedPostsMap.value[postID] = true
+        } else if (typeof engagement.userHasUpvoted === 'boolean') {
+          likedPostsMap.value[postID] = engagement.userHasUpvoted
+        } else {
+          likedPostsMap.value[postID] = false
+        }
       }
       
       saveEngagementToStorage(postID)
@@ -494,6 +511,33 @@ const loadTemplateInfo = async (templateID: string) => {
       console.error(`Error loading template ${templateID}:`, error)
     }
   }
+}
+
+// Fetch and cache author username
+const fetchAuthorName = async (authorID: string) => {
+  // Skip if already cached
+  if (authorCache.value[authorID]) {
+    return authorCache.value[authorID]
+  }
+  
+  // Skip if it's the current user (we already have their name)
+  if (authorID === authStore.userID && authStore.username) {
+    authorCache.value[authorID] = authStore.username
+    return authStore.username
+  }
+  
+  try {
+    const { userAccountAPI } = await import('@/services/api')
+    const response = await userAccountAPI.getUser(authorID)
+    if (response.user && response.user.username) {
+      authorCache.value[authorID] = response.user.username
+      return response.user.username
+    }
+  } catch (error) {
+    console.error(`Failed to fetch username for ${authorID}:`, error)
+  }
+  
+  return 'MIT Student' // Fallback
 }
 
 // Helper functions

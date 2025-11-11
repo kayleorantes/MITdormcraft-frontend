@@ -39,6 +39,8 @@ export interface Comment {
 export interface Engagement {
   upvotes: string[]
   comments: Comment[]
+  upvoteCount?: number
+  userHasUpvoted?: boolean
 }
 
 // API Response types

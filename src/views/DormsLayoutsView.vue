@@ -315,6 +315,42 @@ const getSampleTemplates = (): RoomTemplate[] => {
   ]
 }
 
+// Fetch and cache author username
+const fetchAuthorName = async (authorID: string) => {
+  // Skip if already cached
+  if (authorCache.value[authorID]) {
+    console.log(`[fetchAuthorName] Using cached name for ${authorID}:`, authorCache.value[authorID])
+    return authorCache.value[authorID]
+  }
+  
+  // Skip if it's the current user (we already have their name)
+  if (authorID === authStore.userID && authStore.username) {
+    console.log(`[fetchAuthorName] Using current user's name for ${authorID}:`, authStore.username)
+    authorCache.value[authorID] = authStore.username
+    return authStore.username
+  }
+  
+  try {
+    console.log(`[fetchAuthorName] Fetching username for ${authorID}...`)
+    const { userAccountAPI } = await import('@/services/api')
+    const response = await userAccountAPI.getUser(authorID)
+    console.log(`[fetchAuthorName] Response for ${authorID}:`, response)
+    if (response.user && response.user.username) {
+      authorCache.value[authorID] = response.user.username
+      console.log(`[fetchAuthorName] Successfully cached username for ${authorID}:`, response.user.username)
+      return response.user.username
+    } else {
+      console.warn(`[fetchAuthorName] No username in response for ${authorID}:`, response)
+    }
+  } catch (error: any) {
+    console.error(`[fetchAuthorName] Failed to fetch username for ${authorID}:`, error)
+    console.error(`[fetchAuthorName] Error details:`, error.response?.data)
+  }
+  
+  console.log(`[fetchAuthorName] Using fallback name for ${authorID}`)
+  return 'MIT Student' // Fallback
+}
+
 // Load all posts when no filters are selected
 const loadAllPosts = async () => {
   isLoadingPosts.value = true
@@ -343,6 +379,8 @@ const loadAllPosts = async () => {
             if (!seenPostIds.has(post._id)) {
               seenPostIds.add(post._id)
               allPosts.push(post)
+              // Fetch author name for this post
+              await fetchAuthorName(post.authorID)
             }
           }
         } catch (error) {
@@ -618,18 +656,47 @@ const loadEngagementForPost = async (postID: string) => {
   
   // Then try to get from API and merge
   try {
+    console.log(`[loadEngagement] Fetching engagement for post ${postID}...`)
     const response = await engagementAPI.getEngagementForPost(postID)
+    console.log(`[loadEngagement] Engagement response for ${postID}:`, response)
     if (response.engagement) {
-      postComments.value[postID] = response.engagement.comments || []
-      const upvotes = response.engagement.upvotes || []
-      likeCounts.value[postID] = upvotes.length
-      likedPosts.value[postID] = authStore.userID ? upvotes.includes(authStore.userID) : false
+      const engagement = response.engagement
+      postComments.value[postID] = engagement.comments || []
+      const upvotes = engagement.upvotes || []
+      const likeCount = typeof engagement.upvoteCount === 'number'
+        ? engagement.upvoteCount
+        : upvotes.length
+      likeCounts.value[postID] = likeCount
+      if (authStore.userID) {
+        if (upvotes.includes(authStore.userID)) {
+          likedPosts.value[postID] = true
+        } else if (typeof engagement.userHasUpvoted === 'boolean') {
+          likedPosts.value[postID] = engagement.userHasUpvoted
+        } else {
+          likedPosts.value[postID] = false
+        }
+      } else {
+        likedPosts.value[postID] = false
+      }
+      
+      console.log(`[loadEngagement] Post ${postID} has ${likeCount} upvotes and ${(engagement.comments || []).length} comments`)
+      console.log(`[loadEngagement] Upvotes from users:`, upvotes)
+      console.log(`[loadEngagement] Comments:`, engagement.comments)
+      
+      // Fetch author names for all comments
+      for (const comment of engagement.comments || []) {
+        if (comment.authorID) {
+          console.log(`[loadEngagement] Fetching author name for comment by ${comment.authorID}`)
+          await fetchAuthorName(comment.authorID)
+        }
+      }
       
       // Save updated data to localStorage
       saveEngagementToStorage(postID)
     }
-  } catch (error) {
-    console.log(`API engagement not available for post ${postID}, using localStorage`)
+  } catch (error: any) {
+    console.log(`[loadEngagement] API engagement not available for post ${postID}, using localStorage`)
+    console.error(`[loadEngagement] Error details:`, error.response?.data)
     
     // If we couldn't load from localStorage either, initialize defaults
     if (!loadedFromStorage) {
@@ -900,6 +967,19 @@ watch(() => route.path, (newPath, oldPath) => {
   // If we're navigating back to this page from create-post
   if (newPath === '/dorms' && oldPath) {
     console.log('Route changed to /dorms, refreshing posts...')
+    if (selectedDorms.value.length === 0 && selectedRoomTypes.value.length === 0) {
+      loadAllPosts()
+    } else {
+      loadFilteredPosts()
+    }
+  }
+})
+
+// Watch for refresh query parameter
+watch(() => route.query.refresh, (newValue, oldValue) => {
+  if (newValue && newValue !== oldValue) {
+    console.log('Refresh query parameter detected, reloading posts...')
+    // Force a refresh of the posts
     if (selectedDorms.value.length === 0 && selectedRoomTypes.value.length === 0) {
       loadAllPosts()
     } else {

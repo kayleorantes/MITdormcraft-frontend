@@ -331,28 +331,12 @@ const handleSubmit = async () => {
         })
         
         console.log('Template creation response:', templateResponse)
-        console.log('Template response type:', typeof templateResponse)
-        console.log('Template response keys:', Object.keys(templateResponse || {}))
         
-        // Try various ways to extract the template ID
-        let templateID = null
-        
-        // Check if response is just a string ID
-        if (typeof templateResponse === 'string') {
-          templateID = templateResponse
-        } 
-        // Check for various possible field names
-        else if (templateResponse) {
-          templateID = templateResponse.templateID || 
-                      (templateResponse as any)._id || 
-                      (templateResponse as any).id ||
-                      (templateResponse as any).postID
-        }
-        
-        if (templateID && typeof templateID === 'string') {
+        // Backend returns {templateID: "string"} according to API spec
+        if (templateResponse && templateResponse.templateID) {
           // Create a template object with the returned ID
           template = {
-            _id: templateID,
+            _id: templateResponse.templateID,
             dormName: formData.selectedDorm,
             roomType: formData.selectedRoomType
           }
@@ -360,28 +344,16 @@ const handleSubmit = async () => {
           availableTemplates.value.push(template)
           console.log('Successfully created template:', template)
         } else {
-          console.warn('Could not extract template ID from response')
-          // Use a fallback template ID format
-          const fallbackID = `${formData.selectedDorm}-${formData.selectedRoomType}`.toLowerCase().replace(/\s+/g, '-')
-          template = {
-            _id: fallbackID,
-            dormName: formData.selectedDorm,
-            roomType: formData.selectedRoomType
-          }
-          console.log('Using fallback template:', template)
+          console.error('Invalid template response:', templateResponse)
+          throw new Error(`Could not create template. Backend returned: ${JSON.stringify(templateResponse)}`)
         }
       } catch (templateError: any) {
         console.error('Error creating template:', templateError)
         console.error('Error details:', templateError.response?.data)
         
-        // Use a fallback template ID so we can still create the post
-        const fallbackID = `${formData.selectedDorm}-${formData.selectedRoomType}`.toLowerCase().replace(/\s+/g, '-')
-        template = {
-          _id: fallbackID,
-          dormName: formData.selectedDorm,
-          roomType: formData.selectedRoomType
-        }
-        console.log('Template creation failed, using fallback template:', template)
+        // Re-throw the error with context
+        const errorMsg = templateError.response?.data?.error || templateError.message || 'Unknown error'
+        throw new Error(`Failed to create template for ${formData.selectedDorm} - ${formData.selectedRoomType}: ${errorMsg}`)
       }
     }
     
@@ -398,19 +370,32 @@ const handleSubmit = async () => {
       }
     }
     
+    // Validate we have required data
+    if (!authStore.userID) {
+      throw new Error('You must be logged in to create a post. Please login and try again.')
+    }
+    
+    // Validate template exists and has an ID
+    if (!template || !template._id) {
+      console.error('Template validation failed:', { template })
+      throw new Error('Failed to get valid template ID. Please try again or select a different dorm/room combination.')
+    }
+    
+    console.log('✓ All validations passed. Template ID:', template._id)
+    
     // Create the post
     console.log('Creating post with data:', {
-      authorID: authStore.userID,
-      templateID: template._id,
+      authorID: authStore.userID || 'MISSING',
+      templateID: template._id || 'MISSING',
       title: formData.title.trim(),
       description: '',
       imageLength: imageURL.length
     })
     
-    // Create post via API - no localStorage fallback
+    // Create post via API - authentication handled by X-User-ID header interceptor
     console.log('Creating post via API...')
     const response = await designPostAPI.createPost({
-      authorID: authStore.userID!,
+      authorID: authStore.userID,
       templateID: template._id,
       title: formData.title.trim(),
       description: '',
@@ -436,8 +421,8 @@ const handleSubmit = async () => {
     
     // Wait a moment to ensure the backend has fully persisted the post
     setTimeout(() => {
-      // Redirect to dorms page
-      router.push('/dorms')
+      // Redirect to dorms page with a query parameter to force refresh
+      router.push({ path: '/dorms', query: { refresh: Date.now().toString() } })
     }, 1500)
     
   } catch (error: any) {

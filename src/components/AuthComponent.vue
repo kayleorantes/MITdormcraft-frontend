@@ -85,7 +85,7 @@
       <h2>Welcome, {{ authStore.username }}!</h2>
       <p><strong>User ID:</strong> {{ authStore.userID }}</p>
       <p><strong>Bio:</strong> {{ authStore.bio || 'No bio set' }}</p>
-      <button @click="authStore.logout()" class="logout-btn">
+      <button @click="handleLogout" class="logout-btn">
         Logout
       </button>
     </div>
@@ -148,6 +148,11 @@ const handleRegister = async () => {
     registerForm.value.bio = ''
     registerForm.value.credentialData = ''
   }
+}
+
+// Handle logout
+const handleLogout = async () => {
+  await authStore.logout()
 }
 </script>
 

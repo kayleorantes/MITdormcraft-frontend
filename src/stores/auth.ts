@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
-import { authAPI } from '@/services/api'
+import { authAPI, sessionAPI } from '@/services/api'
 import type { RegisterData, User } from '@/types/api'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     userID: null as string | null,
+    token: null as string | null,
     username: null as string | null,
     bio: null as string | null,
     mitKerberos: null as string | null,
@@ -37,13 +38,20 @@ export const useAuthStore = defineStore('auth', {
         const userID = response.userID || response
         
         if (userID && typeof userID === 'string') {
+          // Create a session to get a token
+          console.log('Creating session for user:', userID)
+          const token = await sessionAPI.createSession(userID)
+          console.log('Session token created:', token)
+          
           this.userID = userID
+          this.token = token
           this.username = userData.username
           this.bio = userData.bio
           this.isAuthenticated = true
           
           // Store in localStorage for persistence
           localStorage.setItem('userID', userID)
+          localStorage.setItem('token', token)
           localStorage.setItem('username', userData.username)
           localStorage.setItem('bio', userData.bio)
           localStorage.setItem('mitKerberos', userData.mitKerberos)
@@ -73,11 +81,18 @@ export const useAuthStore = defineStore('auth', {
         })
         
         if (response.userID) {
+          // Create a session to get a token
+          console.log('Creating session for user:', response.userID)
+          const token = await sessionAPI.createSession(response.userID)
+          console.log('Session token created:', token)
+          
           this.userID = response.userID
+          this.token = token
           this.isAuthenticated = true
           
           // Store in localStorage for persistence
           localStorage.setItem('userID', response.userID)
+          localStorage.setItem('token', token)
           
           // Fetch user profile data
           await this.fetchUserProfile(response.userID)
@@ -114,8 +129,19 @@ export const useAuthStore = defineStore('auth', {
     },
 
     // Logout user
-    logout() {
+    async logout() {
+      // Delete session from backend if we have a token
+      if (this.token) {
+        try {
+          await sessionAPI.deleteSession(this.token)
+        } catch (error) {
+          console.error('Failed to delete session:', error)
+          // Continue with logout even if session deletion fails
+        }
+      }
+      
       this.userID = null
+      this.token = null
       this.username = null
       this.bio = null
       this.mitKerberos = null
@@ -125,6 +151,7 @@ export const useAuthStore = defineStore('auth', {
       
       // Clear localStorage
       localStorage.removeItem('userID')
+      localStorage.removeItem('token')
       localStorage.removeItem('username')
       localStorage.removeItem('bio')
       localStorage.removeItem('mitKerberos')
@@ -134,13 +161,15 @@ export const useAuthStore = defineStore('auth', {
     // Initialize auth state from localStorage
     initializeAuth() {
       const userID = localStorage.getItem('userID')
+      const token = localStorage.getItem('token')
       const username = localStorage.getItem('username')
       const bio = localStorage.getItem('bio')
       const mitKerberos = localStorage.getItem('mitKerberos')
       const profileImageURL = localStorage.getItem('profileImageURL')
       
-      if (userID) {
+      if (userID && token) {
         this.userID = userID
+        this.token = token
         this.username = username
         this.bio = bio
         this.mitKerberos = mitKerberos

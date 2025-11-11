@@ -7,6 +7,11 @@ const authStore = useAuthStore()
 
 // Computed property to check if user is logged in
 const isLoggedIn = computed(() => authStore.isLoggedIn)
+
+// Handle logout
+const handleLogout = async () => {
+  await authStore.logout()
+}
 </script>
 
 <template>
@@ -30,7 +35,7 @@ const isLoggedIn = computed(() => authStore.isLoggedIn)
         <!-- User info when logged in -->
         <div v-if="isLoggedIn" class="user-info">
           <span class="welcome-text">Hello, {{ authStore.username || 'User' }}!</span>
-          <button @click="authStore.logout()" class="logout-btn">Logout</button>
+          <button @click="handleLogout" class="logout-btn">Logout</button>
         </div>
       </div>
     </header>

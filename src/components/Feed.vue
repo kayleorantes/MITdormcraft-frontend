@@ -213,6 +213,33 @@ const selectTemplate = async (template: RoomTemplate) => {
   await loadPostsForTemplate(template._id)
 }
 
+// Fetch and cache author username
+const fetchAuthorName = async (authorID: string) => {
+  // Skip if already cached
+  if (authorCache.value[authorID]) {
+    return authorCache.value[authorID]
+  }
+  
+  // Skip if it's the current user (we already have their name)
+  if (authorID === authStore.userID && authStore.username) {
+    authorCache.value[authorID] = authStore.username
+    return authStore.username
+  }
+  
+  try {
+    const { userAccountAPI } = await import('@/services/api')
+    const response = await userAccountAPI.getUser(authorID)
+    if (response.user && response.user.username) {
+      authorCache.value[authorID] = response.user.username
+      return response.user.username
+    }
+  } catch (error) {
+    console.error(`Failed to fetch username for ${authorID}:`, error)
+  }
+  
+  return 'MIT Student' // Fallback
+}
+
 // Load posts for a specific template
 const loadPostsForTemplate = async (templateID: string) => {
   isLoadingPosts.value = true
@@ -222,6 +249,11 @@ const loadPostsForTemplate = async (templateID: string) => {
     const response = await designPostAPI.findPostsByTemplate(templateID)
     posts.value = response || []
     console.log(`Loaded ${posts.value.length} posts for template ${templateID}`)
+    
+    // Fetch author names for all posts
+    for (const post of posts.value) {
+      await fetchAuthorName(post.authorID)
+    }
     
     // Show posts immediately, then load engagement in background
     isLoadingPosts.value = false
@@ -251,12 +283,34 @@ const loadEngagementForPost = async (postID: string) => {
     console.log(`Loaded engagement for post ${postID} in ${Math.round(endTime - startTime)}ms`)
     
     if (response.engagement) {
-      postComments.value[postID] = response.engagement.comments || []
+      const engagement = response.engagement
+      postComments.value[postID] = engagement.comments || []
+      
+      // Fetch author names for all comments
+      for (const comment of engagement.comments || []) {
+        if (comment.authorID) {
+          await fetchAuthorName(comment.authorID)
+        }
+      }
       
       // Update like counts and status
-      const upvotes = response.engagement.upvotes || []
-      likeCounts.value[postID] = upvotes.length
-      likedPosts.value[postID] = authStore.userID ? upvotes.includes(authStore.userID) : false
+      const upvotes = engagement.upvotes || []
+      const likeCount = typeof engagement.upvoteCount === 'number'
+        ? engagement.upvoteCount
+        : upvotes.length
+      likeCounts.value[postID] = likeCount
+      
+      if (authStore.userID) {
+        if (upvotes.includes(authStore.userID)) {
+          likedPosts.value[postID] = true
+        } else if (typeof engagement.userHasUpvoted === 'boolean') {
+          likedPosts.value[postID] = engagement.userHasUpvoted
+        } else {
+          likedPosts.value[postID] = false
+        }
+      } else {
+        likedPosts.value[postID] = false
+      }
     }
   } catch (error) {
     console.warn(`Failed to load engagement for post ${postID}:`, error)
