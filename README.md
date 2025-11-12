@@ -23,12 +23,6 @@ Users can view and interact with content anonymously, ensuring a comfortable spa
 
 ---
 
-**Backend Repository:** https://github.com/kayleorantes/MITdormcraft
-
-**All deliverables (design doc, reflections, trace) are in the backend repository.**
-
----
-
 # User Journey: The Videos!
 
 [![Watch the NEW 4C video](https://youtu.be/JkfNtzqBwAM)](https://youtu.be/JkfNtzqBwAM)
