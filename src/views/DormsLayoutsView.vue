@@ -362,15 +362,25 @@ const loadAllPosts = async () => {
     console.log(`Loaded ${allPosts.length} posts from findPosts endpoint`)
     console.log('Sample post data:', allPosts.length > 0 ? allPosts[0] : 'No posts')
     
-    // SET POSTS IMMEDIATELY so they show up in UI
+    // Load template info FIRST before showing posts
     if (allPosts.length > 0) {
-      console.log('Showing real posts')
-      posts.value = allPosts
-      isLoadingPosts.value = false // Stop loading spinner immediately
+      console.log('Loading template information for posts...')
       
-      // Load template info and engagement in background
+      // Load templates first (in batches for performance)
+      const templatePromises = allPosts.map(post => 
+        loadTemplateInfo(post.templateID).catch(err => {
+          console.error('Error loading template:', err)
+          return null
+        })
+      )
+      await Promise.all(templatePromises)
+      
+      console.log('Template info loaded, showing posts')
+      posts.value = allPosts
+      isLoadingPosts.value = false // Stop loading spinner after templates are loaded
+      
+      // Load author names and engagement in background
       for (const post of allPosts) {
-        loadTemplateInfo(post.templateID).catch(err => console.error('Error loading template:', err))
         fetchAuthorName(post.authorID).catch(err => console.error('Error loading author:', err))
         loadEngagementForPost(post._id).catch(err => console.error('Error loading engagement:', err))
       }
@@ -533,10 +543,21 @@ const loadFilteredPosts = async () => {
       return dateB - dateA
     })
     
-    posts.value = allPosts
     console.log(`Total posts after filtering: ${allPosts.length}`)
     
-    // Load engagement data and template info for each post
+    // Load template info FIRST for all posts before displaying
+    const templatePromises = allPosts
+      .filter(post => !post._id.startsWith('sample-'))
+      .map(post => loadTemplateInfo(post.templateID).catch(err => {
+        console.error(`Error loading template for post ${post._id}:`, err)
+        return null
+      }))
+    await Promise.all(templatePromises)
+    
+    // Now set posts to display them
+    posts.value = allPosts
+    
+    // Load engagement data in background
     await Promise.all(posts.value.map(async (post) => {
       // For sample posts, use mock engagement data
       if (post._id.startsWith('sample-')) {
@@ -545,7 +566,6 @@ const loadFilteredPosts = async () => {
         likedPosts.value[post._id] = false
       } else {
         await loadEngagementForPost(post._id)
-        await loadTemplateInfo(post.templateID)
       }
     }))
   } catch (error: any) {
@@ -680,33 +700,68 @@ const getPostLocation = (templateID: string) => {
 
 // Helper to load template info if needed
 const loadTemplateInfo = async (templateID: string) => {
-  if (!templateCache.value[templateID]) {
-    try {
-      const response = await roomTemplateAPI.getTemplate(templateID)
-      if (response.template) {
-        templateCache.value[templateID] = response.template
-      }
-    } catch (error) {
-      console.error(`Error loading template ${templateID}:`, error)
+  // Check if already cached
+  if (templateCache.value[templateID]) {
+    console.log(`Template ${templateID} already cached:`, templateCache.value[templateID])
+    return
+  }
+  
+  console.log(`Loading template info for ${templateID}...`)
+  
+  try {
+    const response = await roomTemplateAPI.getTemplate(templateID)
+    console.log(`Template API response for ${templateID}:`, response)
+    
+    if (response && response.template) {
+      templateCache.value[templateID] = response.template
+      console.log(`Successfully loaded template ${templateID}:`, response.template)
+    } else {
+      console.warn(`No template data returned for ${templateID}, response:`, response)
+      // Try fallback
+      createFallbackTemplate(templateID)
+    }
+  } catch (error: any) {
+    console.error(`Error loading template ${templateID}:`, error)
+    console.error(`Error details:`, error.response?.data)
+    
+    // Create a fallback template from the templateID if it follows our naming convention
+    createFallbackTemplate(templateID)
+  }
+}
+
+// Helper to create fallback template from templateID string
+const createFallbackTemplate = (templateID: string) => {
+  // e.g., "new-vassar-double" -> { dormName: "New Vassar", roomType: "Double" }
+  if (templateID.includes('-')) {
+    const parts = templateID.split('-')
+    if (parts.length >= 2) {
+      const roomType = parts[parts.length - 1] || 'unknown'
+      const dormName = parts.slice(0, -1).map(p => 
+        p.charAt(0).toUpperCase() + p.slice(1)
+      ).join(' ')
       
-      // Create a fallback template from the templateID if it follows our naming convention
-      // e.g., "new-vassar-double" -> { dormName: "New Vassar", roomType: "Double" }
-      if (templateID.includes('-')) {
-        const parts = templateID.split('-')
-        if (parts.length >= 2) {
-          const roomType = parts[parts.length - 1] || 'unknown'
-          const dormName = parts.slice(0, -1).map(p => 
-            p.charAt(0).toUpperCase() + p.slice(1)
-          ).join(' ')
-          
-          templateCache.value[templateID] = {
-            _id: templateID,
-            dormName: dormName,
-            roomType: roomType.charAt(0).toUpperCase() + roomType.slice(1)
-          }
-          console.log(`Created fallback template for ${templateID}:`, templateCache.value[templateID])
-        }
+      templateCache.value[templateID] = {
+        _id: templateID,
+        dormName: dormName,
+        roomType: roomType.charAt(0).toUpperCase() + roomType.slice(1)
       }
+      console.log(`Created fallback template for ${templateID}:`, templateCache.value[templateID])
+    } else {
+      console.warn(`Could not parse templateID ${templateID} for fallback`)
+      // Create generic fallback
+      templateCache.value[templateID] = {
+        _id: templateID,
+        dormName: 'MIT Dorm',
+        roomType: 'Room'
+      }
+    }
+  } else {
+    console.warn(`TemplateID ${templateID} doesn't match expected format`)
+    // Create generic fallback
+    templateCache.value[templateID] = {
+      _id: templateID,
+      dormName: 'MIT Dorm',
+      roomType: 'Room'
     }
   }
 }

@@ -3,7 +3,7 @@
 ## MITDormCraft Project Experience
 
 **Name:** Kayle Orantes  
-**Date:** November 12, 2025
+**Date:** November 11, 2025
 
 ---
 
@@ -152,7 +152,7 @@ This is where things got really rough. After working on the app for weeks with e
 
 **1. Delaying Sessions/Syncs Integration**
 - **What I did:** Built the whole app with fake authentication, planned to "add it later"
-- **Why this was bad:** "Later" turned into "the night before deployment" and it was a nightmare
+- **Why this was bad:** "Later" made a lot of issues back up and it was a nightmare
 - **Lesson:** Build security from the start, not as an afterthought
 - **How to avoid:** Next project, I'm setting up auth on day one
 
