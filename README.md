@@ -15,11 +15,13 @@ Users can view and interact with content anonymously, ensuring a comfortable spa
 
 ---
 
-## 🌐 Live Deployment
+## Assignment Links
 
 - **Frontend:** https://mit-dormcraft.onrender.com/
 - **Backend:** https://mit-dormcraft-backend.onrender.com
 - **Backend Repository:** https://github.com/kayleorantes/MITdormcraft
+- **Design Doc:** [Design Document](DESIGN_DOCUMENT_4C.md)
+- **Reflections:** [Reflections](REFLECTIONS_4C.md)
 
 ---
 
