@@ -3,7 +3,7 @@
 ## MITDormCraft
 
 **Author:** Kayle Orantes  
-**Date:** November 12, 2025  
+**Date:** November 11, 2025  
 **Backend Repository:** https://github.com/kayleorantes/MITdormcraft  
 **Frontend Repository:** https://github.com/kayleorantes/MITdormcraft-frontend  
 **Deployed Frontend:** https://mit-dormcraft.onrender.com  
