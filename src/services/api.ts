@@ -276,7 +276,7 @@ export const engagementAPI = {
 
     const comments = Array.isArray(rawEngagement.comments)
       ? rawEngagement.comments.filter(
-          (comment): comment is Comment =>
+          (comment: any): comment is Comment =>
             comment !== null &&
             typeof comment === "object" &&
             typeof (comment as Comment).commentID === "string",
